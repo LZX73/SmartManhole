@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Data Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script nonce="undefined" src="https://cdn.zingchart.com/zingchart.min.js"></script>
+    <!-- Include Firebase JavaScript SDK -->
+    <!-- Firebase JavaScript SDK -->
+    
+   
+
+    
+    
+</head>
+
+<style>
+    body {
+        background-color: #ffffff; /* White background */
+        color: #000000; /* Black text */
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+    }
+
+    header {
+        background-color: #FFFFFF;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #000000;
+        text-decoration: none;
+    }
+
+    .nav-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-link {
+        margin: 0 15px;
+        text-decoration: none;
+        color: #000000;
+        font-weight: bold;
+        background: linear-gradient(180deg, transparent 70%, #8ED6FF 70%);
+        background-size: 100% 200%;
+        transition: background-position 0.3s;
+        padding: 2px;
+    }
+
+    .nav-link:hover {
+        background-position: 0 -100%;
+    }
+
+    .sensor-container {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        margin: 20px 0;
+    }
+
+    .sensor-box {
+        flex: 1;
+        background-color: #ffffff; /* White box background */
+        color: #000000; /* Black text */
+        border: 2px solid #000000; /* Black border */
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .gauge-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .gauge-box {
+        flex: 1;
+        text-align: center;
+        border: 2px solid #000;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 0 10px;
+    }
+
+    .gauge-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .gauge {
+        width: 100%;
+        max-width: 250px;
+        font-family: "Roboto", sans-serif;
+        font-size: 32px;
+        color: #258f7a;
+    }
+
+    .gauge__body {
+        width: 100%;
+        height: 0;
+        padding-bottom: 50%;
+        background: #b4c0be;
+        position: relative;
+        border-top-left-radius: 100% 200%;
+        border-top-right-radius: 100% 200%;
+        overflow: hidden;
+    }
+
+    .gauge__fill {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: inherit;
+        height: 100%;
+        background: conic-gradient(
+            from 0deg to 180deg,
+            #00ff00 0%,
+            #ffff00 50%,
+            #ff0000 100%
+        );
+        transform-origin: center top;
+        transform: rotate(0.25turn);
+        transition: transform 0.2s ease-out;
+    }
+
+    .gauge__cover {
+        width: 75%;
+        height: 150%;
+        background: #ffffff;
+        border-radius: 50%;
+        position: absolute;
+        top: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 25%;
+        box-sizing: border-box;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #000000; /* Black border */
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #ffffff; /* White header background for table */
+        color: #000000; /* Black text */
+    }
+
+    .sensor-box:nth-child(1) {
+        display: none; /* Hide the Carbon Monoxide sensor box */
+    }
+
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-box {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        cursor: pointer;
+    }
+
+    .search-container {
+        width: 100%; /* Occupy full width */
+        max-width: 800px; /* Set max-width to limit horizontal size */
+        margin-bottom: 20px; /* Add margin at bottom */
+    }
+
+    .search-input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 200px;
+    }
+
+    .battery-container {
+        display: flex;
+        align-items: center;
+        padding: 10px; /* Add padding for spacing */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
+    }
+
+    .battery {
+        width: 80px; /* Reduced width */
+        height: 30px; /* Reduced height */
+        padding: 5px; /* Reduced padding */
+        border: 1px solid white;
+        border-radius: 5px;
+        background-color: #f2f2f2; /* Light gray background */
+        position: relative;
+        margin-right: 10px; /* Added margin for spacing */
+        overflow: hidden; /* Hide overflow */
+    }
+
+    #battery-per {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background-color: rgb(8, 198, 11);
+        border-radius: 5px;
+    }
+
+    .battery-level {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.3s ease; /* Added transition for smooth width change */
+    }
+
+    .low-battery .battery-level {
+        background-color: #ff0000; /* Red background for low battery */
+    }
+
+    .high-battery .battery-level {
+        background-color: #00FF00
+    }
+
+    .graph-box {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 10px;
+        position: relative;
+    }
+
+    .graph-box canvas {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+    }
+    .e-hole-container,
+    .sensor-container {
+        flex-basis: calc(50% - 20px); /* Adjust width to fit half of the container */
+    }
+
+    .e-hole-details,
+    .sensor-box {
+        background-color: #ffffff; /* White box background */
+        color: #000000; /* Black text */
+        border: 2px solid #000000; /* Black border */
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .graph-container {
+        margin-top: 20px; /* Add some top margin */
+        margin-bottom: 20px; /* Add some bottom margin */
+        border: 2px solid #000000;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .sensor-container {
+        flex-basis: calc(50% - 20px); /* Adjust width to fit half of the container */
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .sensor-box {
+        flex-basis: calc(50% - 20px); /* Adjust width to fit half of the container */
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px solid #000000;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .graph-container {
+        order: 2; /* Change the order to 2 so it appears after the e-hole container */
+    }
+
+    .e-hole-container {
+        order: 1;
+    }
+
+    .e-hole-container img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+
+    .centered-image {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .date-selector-btn, .apply-btn {
+        background-color: #000;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .date-selector-btn:hover, .apply-btn:hover {
+        background-color: #333;
+    }
+
+    .date-input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+</style>
+
+<body>
+<header>
+    <a href="#" class="logo">E-Hole Condition Monitoring</a>
+    <div class="nav-container">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/sensor" class="nav-link">Monitoring</a>
+        <a href="/controlpanel" class="nav-link">Control Panel</a>
+        <a href="/report_dashboard" class="nav-link">Report Dashboard</a>
+        <a href="/Settings" class="nav-link">Settings</a>
+    </div>
+</header>
+
+<div class="battery-container">
+    <div class="battery">
+        <div id="battery-per"></div>
+        <div class="battery-level" id="batteryLevel"></div>
+    </div>
+    <div class="battery-info">
+        <div id="batteryStatus" class="battery-status">Battery Status</div>
+        <div id="batteryValue" class="battery-value"></div>
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="e-hole-container">
+    <div class="e-hole-details">
+        <h2>E-Hole Details</h2>
+        <img src="static\idp figure.png" width="300" height="300">
+        <table>
+            <thead>
+                    <th><b>Details</b></th>
+                    <th><b>Content</b></th>
+                </tr>
+            </thead>
+            <tbody id="sensorData">
+                <tr>
+                    <td>Type of manhole</td>
+                    <td>Standard Manholes</td>
+                </tr>
+                <tr>
+                    <td>Location of the manhole</td>
+                    <td>Faculty of Engineering Universiti Malaya</td>
+                </tr>
+                <tr>
+                    <td>Gas Threshold</td>
+                    <td>300 ppm</td>
+                </tr>
+                <tr>
+                    <td>Water Level Threshold</td>
+                    <td>800 cm</td>
+                </tr>
+                <tr>
+                    <td>Inflow and Outflow Pipe</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Maintenance Frequency</td>
+                    <td>4 times in a month</td>
+                </tr>
+                <tr>
+                    <td>Person in-charge for the Monitoring</td>
+                    <td>Ze Xun, Xin Ru, Jie Yi, Mun Ken</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+        <div class="gauge-box">
+            <div class="gauge-title">Methane Value</div>
+            <div id="methaneGauge" class="gauge"></div>
+            <div id="methaneValue" class="gauge-value"></div>
+        </div>
+
+        <div class="gauge-box">
+            <div class="gauge-title">Pitch Angle</div>
+            <div id="pitchGauge" class="gauge"></div>
+            <div id="pitchValue" class="gauge-value"></div>
+        </div>
+
+        <div class="gauge-box">
+            <div class="gauge-title">Roll Angle</div>
+            <div id="rollGauge" class="gauge"></div>
+            <div id="rollValue" class="gauge-value"></div>
+        </div>
+
+        <div class="gauge-box">
+            <div class="gauge-title">Water Level</div>
+            <div id="WaterlevelGauge" class="gauge"></div>
+            <div id="waterlevelValue" class="gauge-value"></div>
+        </div>
+    </div>
+
+    <hr>
+        <div class="graph-container">
+            <h2>Water Level Graph</h2>
+            <div class="graph-box">
+                <canvas id="waterLevelChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <h2>Methane Graph</h2>
+            <div class="graph-box">
+                <canvas id="methaneChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+  <hr>
+
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search..." onkeyup="searchTable()">
+    </div>
+
+    <button class="date-selector-btn" onclick="toggleDateSelector()">Select Date</button>
+    <div id="dateSelector" style="display: none;">
+        <input type="date" id="selectedDate" class="date-input">
+        <button class="apply-btn" onclick="applySelectedDate()">Apply</button>
+    </div>
+
+        <table id="sensorTable">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Methane (ppm)</th>
+                    <th>Pitch Angle (°)</th>
+                    <th>Roll Angle (°)</th>
+                    <th>Water Level (cm)</th>
+                    <th>Battery Level (V)</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in data %}
+                {% set waterLevelValue = entry['water_level']|float %}
+                <tr {% if waterLevelValue > 120 %}{% endif %}>
+                    <td>{{ entry['timestamp'] }}</td>
+                    <td>{{ entry['methane'] }} </td>
+                    <td>{{ entry['Pitch_angle'] }} </td>
+                    <td>{{ entry['Roll_angle'] }} </td>
+                    <td>{{ entry['water_level'] }}</td>
+                    <td>{{ entry['battery_level'] }}</td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="overlay" id="notificationOverlay">
+        <div class="notification-box" id="notificationBox">
+            <span class="close-btn" onclick="closeNotificationBox()">X</span>
+            Water level exceeds <span id="thresholdValue">{{ threshold }}</span> cm. Please take action.
+        </div>
+    </div>
+
+<script>
+    {% for item in parameter_data_list %}
+        var threshold = {{ item['water_threshold'] }}; 
+    {% endfor %}
+
+    // Retrieve the threshold value from localStorage
+    //var threshold = localStorage.getItem('waterLevelThreshold');
+    threshold = parseFloat(threshold);
+
+    // Extract timestamps and water levels from the data
+    const timestamps = [];
+    const waterLevels = [];
+    {% for entry in data %}
+    timestamps.push('{{ entry.timestamp }}');
+    waterLevels.push({{ entry.water_level }});
+    {% endfor %}
+
+    // Create a line chart
+    const ctx = document.getElementById('waterLevelChart').getContext('2d');
+    const waterLevelChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: 'Water Level (cm)',
+                data: waterLevels,
+                borderColor: 'blue',
+                borderWidth: 1,
+                fill: false
+            },
+            {
+                label: 'Critical Level (' + threshold + ' cm)',
+                data: Array(timestamps.length).fill(threshold),
+                borderColor: 'red',
+                borderWidth: 2,
+                fill: false,
+                borderDash: []
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Water Level (cm)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to retrieve URL query parameter value by name
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    // Notify user if water level exceeds the threshold value
+    const lastWaterLevel = waterLevels[waterLevels.length - 1];
+    if (lastWaterLevel > threshold) {
+        const notificationOverlay = document.getElementById('notificationOverlay');
+        notificationOverlay.style.display = 'flex';
+    }
+
+    // Update the span element with the retrieved threshold value
+    document.getElementById('thresholdValue').innerText = threshold;
+
+    // Function to close the notification box
+    function closeNotificationBox() {
+        const notificationOverlay = document.getElementById('notificationOverlay');
+        notificationOverlay.style.display = 'none';
+    }
+
+    // Function to search the table
+    function searchTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementsByClassName("search-input")[0];
+        filter = input.value.toUpperCase();
+        table = document.getElementById("sensorTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td");
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        break;
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    }
+
+    // Function to update methane gauge
+    function updateMethaneGauge(value) {
+        const methaneConfig = {
+            type: "gauge",
+            globals: {
+                fontSize: 25
+            },
+            plotarea: {
+                marginTop: 80
+            },
+            plot: {
+                size: '100%',
+                valueBox: {
+                    placement: 'center',
+                    text: '%v ppm',
+                    fontSize: 35
+                }
+            },
+            series: [{
+                values: [value],
+                backgroundColor: '#000000',
+                borderWidth: 2,
+                borderColor: '#000000',
+                borderRadius: 5,
+                indicator: [10, 10, 10, 10, 0.75],
+                animation: {
+                    effect: 2,
+                    method: 1,
+                    sequence: 4,
+                    speed: 900
+                },
+            }]
+        };
+
+        zingchart.render({
+            id: 'methaneGauge',
+            data: methaneConfig,
+            height: 300,
+            width: '100%'
+        });
+
+        document.getElementById('methaneValue').innerText = value + ' ppm';
+    }
+
+    function updateWaterlevelGauge(value) {
+        const waterlevelConfig = {
+            type: "gauge",
+            globals: {
+                fontSize: 25
+            },
+            plotarea: {
+                marginTop: 80
+            },
+            plot: {
+                size: '100%',
+                valueBox: {
+                    placement: 'center',
+                    text: '%v mm',
+                    fontSize: 35
+                }
+            },
+            series: [{
+                values: [value],
+                backgroundColor: '#000000',
+                borderWidth: 2,
+                borderColor: '#000000',
+                borderRadius: 5,
+                indicator: [10, 10, 10, 10, 0.75],
+                animation: {
+                    effect: 2,
+                    method: 1,
+                    sequence: 4,
+                    speed: 900
+                },
+            }]
+        };
+
+        zingchart.render({
+            id: 'WaterlevelGauge',
+            data: waterlevelConfig,
+            height: 300,
+            width: '100%'
+        });
+
+        document.getElementById('waterlevelValue').innerText = value + ' mm';
+    }
+
+    // Function to update pitch gauge
+    function updatePitchGauge(value) {
+        const pitchConfig = {
+            type: "gauge",
+            globals: {
+                fontSize: 25
+            },
+            plotarea: {
+                marginTop: 80
+            },
+            plot: {
+                size: '100%',
+                valueBox: {
+                    placement: 'center',
+                    text: '%v °',
+                    fontSize: 35
+                }
+            },
+            series: [{
+                values: [value],
+                backgroundColor: '#000000',
+                borderWidth: 2,
+                borderColor: '#000000',
+                borderRadius: 5,
+                indicator: [10, 10, 10, 10, 0.75],
+                animation: {
+                    effect: 2,
+                    method: 1,
+                    sequence: 4,
+                    speed: 900
+                },
+            }]
+        };
+
+        zingchart.render({
+            id: 'pitchGauge',
+            data: pitchConfig,
+            height: 300,
+            width: '100%'
+        });
+
+        document.getElementById('pitchValue').innerText = value + ' °';
+    }
+
+    // Function to update roll gauge
+    function updateRollGauge(value) {
+        const rollConfig = {
+            type: "gauge",
+            globals: {
+                fontSize: 25
+            },
+            plotarea: {
+                marginTop: 80
+            },
+            plot: {
+                size: '100%',
+                valueBox: {
+                    placement: 'center',
+                    text: '%v °',
+                    fontSize: 35
+                }
+            },
+            series: [{
+                values: [value],
+                backgroundColor: '#000000',
+                borderWidth: 2,
+                borderColor: '#000000',
+                borderRadius: 5,
+                indicator: [10, 10, 10, 10, 0.75],
+                animation: {
+                    effect: 2,
+                    method: 1,
+                    sequence: 4,
+                    speed: 900
+                },
+            }]
+        };
+
+        zingchart.render({
+            id: 'rollGauge',
+            data: rollConfig,
+            height: 300,
+            width: '100%'
+        });
+
+        document.getElementById('rollValue').innerText = value + ' °';
+    }
+
+    // Function to update data table based on methane, pitch, and roll values
+    function updateDataTable() {
+        const table = document.getElementById("sensorTable");
+        const rows = table.getElementsByTagName("tr");
+        const lastRow = rows[rows.length - 1];
+
+        const methaneCell = lastRow.getElementsByTagName("td")[1];
+        const methaneValue = parseFloat(methaneCell.textContent);
+
+        const pitchCell = lastRow.getElementsByTagName("td")[2];
+        const pitchValue = parseFloat(pitchCell.textContent);
+
+        const rollCell = lastRow.getElementsByTagName("td")[3];
+        const rollValue = parseFloat(rollCell.textContent);
+
+        const waterCell = lastRow.getElementsByTagName("td")[4];
+        const waterlevelValue = parseFloat(waterCell.textContent);
+
+        updateMethaneGauge(methaneValue);
+        updatePitchGauge(pitchValue);
+        updateRollGauge(rollValue);
+        updateWaterlevelGauge(waterlevelValue);
+    }
+
+    // Initial call to update methane, pitch, and roll gauges
+    updateDataTable();
+
+    // Function to update battery level
+    function updateBatteryLevel(value) {
+        let colorClass;
+        if (value > 9) {
+            colorClass = 'high-battery';
+        } else {
+            colorClass = value >= 3.7 ? 'high-battery' : 'low-battery';
+        }
+        const batteryLevel = document.getElementById('batteryLevel');
+        if (batteryLevel) {
+            batteryLevel.style.width = (value * 90 / 5) + '%';
+            batteryLevel.className = 'battery-level ' + colorClass;
+        }
+
+        const batteryValue = document.getElementById('batteryValue');
+        if (batteryValue) {
+            batteryValue.innerText = value.toFixed(2) + ' V';
+            if (value < 3.7) {
+                batteryValue.innerText += ' - Low battery! Please charge.';
+            }
+        }
+    }
+
+    // Initial call to update battery level indicator
+    updateBatteryLevel(parseFloat(document.querySelector("#sensorTable tbody tr:last-child td:nth-child(6)").innerText));
+
+    // Function to check for updates
+    // function checkForUpdates() {
+    //     fetch('/check_updates')
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.hasUpdates) {
+    //                 location.reload();
+    //             }
+    //         });
+    // }
+
+    // // Set an interval to check for updates every 30 seconds
+    // setInterval(checkForUpdates, 30000);
+
+
+</script>
+<script>
+     // Function to filter data based on the latest date and display in the table
+    function filterAndDisplayLatestData() {
+        const table = document.getElementById("sensorTable");
+        const rows = table.getElementsByTagName("tr");
+        const latestDate = getLatestDate(rows);
+
+        for (let i = 1; i < rows.length; i++) {
+            const timestamp = rows[i].getElementsByTagName("td")[0].textContent;
+            if (!timestamp.startsWith(latestDate)) {
+                rows[i].style.display = "none"; // Hide rows not matching latest date
+            } else {
+                rows[i].style.display = ""; // Show rows matching latest date
+            }
+        }
+    }
+
+    // Function to get the latest date from the table rows
+    function getLatestDate(rows) {
+        let latestDate = new Date(0);
+
+        for (let i = 1; i < rows.length; i++) {
+            const timestamp = rows[i].getElementsByTagName("td")[0].textContent;
+            const date = new Date(timestamp);
+            if (date > latestDate) {
+                latestDate = date;
+            }
+        }
+
+        return latestDate.toISOString().split("T")[0];
+    }
+
+    // Function to toggle date selector visibility
+    function toggleDateSelector() {
+        var dateSelector = document.getElementById("dateSelector");
+        if (dateSelector.style.display === "none") {
+            dateSelector.style.display = "block";
+        } else {
+            dateSelector.style.display = "none";
+        }
+    }
+
+    // Function to apply the selected date and update the data
+    function applySelectedDate() {
+        var selectedDate = document.getElementById("selectedDate").value;
+
+        // Get all rows from the table except the header
+        var rows = document.querySelectorAll("#sensorTable tbody tr");
+
+        // Loop through each row and check the timestamp
+        rows.forEach(function(row) {
+            var timestampCell = row.cells[0]; // Assuming the timestamp is in the first column
+            var timestamp = timestampCell.textContent.trim();
+            var entryDate = timestamp.split(" ")[0]; // Extract date from timestamp
+
+            // If the entry date matches the selected date, show the row; otherwise, hide it
+            if (entryDate === selectedDate) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    // Function to search the table
+    function searchTable() {
+        // Declare variables
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementsByClassName("search-input")[0];
+        filter = input.value.toUpperCase();
+        table = document.getElementById("sensorTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td");
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        break; // Show the row if match found in any column
+                    } else {
+                        tr[i].style.display = "none"; // Hide the row if no match found
+                    }
+                }
+            }
+        }
+    }
+
+    // Call the filter function when the page loads to display only the latest data
+    document.addEventListener("DOMContentLoaded", filterAndDisplayLatestData);
+
+</script>
+
+<script>
+    {% for item in parameter_data_list %}
+        var methaneThreshold = {{ item['gas_threshold'] }}; 
+    {% endfor %}
+    // Retrieve the methane threshold value from localStorage
+    //var methaneThreshold = localStorage.getItem('methaneThreshold');
+    methaneThreshold = parseFloat(methaneThreshold);
+
+    // Extract timestamps and methane values from the data
+    const methaneTimestamps = [];
+    const methaneValues = [];
+
+    {% for entry in data %}
+        methaneTimestamps.push('{{ entry.timestamp }}');
+        methaneValues.push('{{ entry.methane }}');
+    {% endfor %}
+
+    // Create a line chart for methane
+    const methaneCtx = document.getElementById('methaneChart').getContext('2d');
+    const methaneChart = new Chart(methaneCtx, {
+        type: 'line',
+        data: {
+            labels: methaneTimestamps,
+            datasets: [{
+                label: 'Methane (ppm)',
+                data: methaneValues,
+                borderColor: 'green',
+                borderWidth: 1,
+                fill: false
+            },
+            {
+                label: 'Methane Threshold (' + methaneThreshold + ' ppm)',
+                data: Array(methaneTimestamps.length).fill(methaneThreshold),
+                borderColor: 'red',
+                borderWidth: 2,
+                fill: false,
+                borderDash: []
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Methane (ppm)'
+                    }
+                }
+            }
+        }
+    });
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    
+    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4tzOcu-ADuJxhwyiw0cPYLLdjSqTvKz4",
+      authDomain: "smart-manhole-f5530.firebaseapp.com",
+      databaseURL: "https://smart-manhole-f5530-default-rtdb.firebaseio.com",
+      projectId: "smart-manhole-f5530",
+      storageBucket: "smart-manhole-f5530.appspot.com",
+      messagingSenderId: "561649259899",
+      appId: "1:561649259899:web:cfce85efc06cdb9d4759de",
+      measurementId: "G-H3H55QGNCD"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  
+    
+    // Reference to the specific child node you want to listen to ('/data/5PdD2BuswlU0hxkvdQ94EbgKoKz1')
+    const database = getDatabase(app);
+    const db_ref = ref(database,'/data/5PdD2BuswlU0hxkvdQ94EbgKoKz1');
+
+    const table = document.getElementById("sensorTable");
+    const rows = table.getElementsByTagName("tr");
+    const lastRow = rows[rows.length - 1];
+
+    
+    const timeCell = lastRow.getElementsByTagName("td")[0];
+    const timevalue = timeCell.textContent;
+    
+    const olddate = new Date(timevalue);
+    
+    
+
+    function convertTimestampFormat(timestamp) {
+    // Split the original timestamp into parts
+    const parts = timestamp.split(" ");
+
+    // Map month abbreviations to full month names
+    const monthMap = {
+        "Jan": "Jan",
+        "Feb": "Feb",
+        "Mar": "Mar",
+        "Apr": "Apr",
+        "May": "May",
+        "Jun": "Jun",
+        "Jul": "Jul",
+        "Aug": "Aug",
+        "Sep": "Sep",
+        "Oct": "Oct",
+        "Nov": "Nov",
+        "Dec": "Dec"
+    };
+
+    // Extract the components
+    //const dayAbbreviation = parts[0];
+    const monthAbbreviation = parts[1];
+    const dayOfMonth = parts[0];
+    const year = parts[2];
+    const [time, amPm] = parts[3].split(/(?<=\d)(?=[AP]M)/); // Splitting at the position between digits and "AM" or "PM"
+    // Convert month abbreviation to full month name
+    const month = monthMap[monthAbbreviation];
+
+    // Create a Date object from the timestamp
+    const dateObj = new Date(`${monthAbbreviation} ${dayOfMonth} ${year}`);
+
+    // Get the day of the week
+    const dayOfWeek = dateObj.toLocaleDateString("en-US", { weekday: "short" });
+
+    // Extract hours and minutes from time
+    let [hours, minutes] = time.split(":");
+
+    
+    
+    let hours24 = parseInt(hours, 10);
+    minutes = parseInt(minutes, 10);
+    
+
+    if (amPm === "PM" && hours24 < 12) {
+        hours24 += 12;
+    } else if (amPm === "AM" && hours24 === 12) {
+        hours24 = 0;
+    }
+
+    // Construct the new timestamp string
+    const newTimestamp = `${dayOfWeek} ${month} ${dayOfMonth} ${year} ${hours24}:${minutes}:00 GMT+0800 (Malaysia Time)`;
+
+    return newTimestamp;
+}
+
+
+    onChildChanged(db_ref, (snapshot) => {
+            const newData = snapshot.val();
+            const key = snapshot.key;
+            
+            // Parse the timestamp from the data
+            //const dataTimestamp = parseTimestamp(newData.timestamp);
+
+            // const parsedDate = parseTimestamp(newData.timestamp);
+            // const formattedTimestamp = formatTimestamp(parsedDate);
+
+            //const firebaseTimestamp = new Date(newData.timestamp);
+            
+            //console.log("oriTimestamp :",newData.timestamp);
+            const convertedTimestamp = convertTimestampFormat(newData.timestamp);
+            //console.log("convertedTimestamp :",convertedTimestamp);
+            const newDate = new Date(convertedTimestamp);
+            //console.log("New :",newDate);
+            //console.log("Old:",olddate);
+            
+
+            // Check if the data was added after the script started
+            if (newDate > olddate) {
+              console.log("New data added:", newData);
+              // Update your website content with the new data
+              updateWebsite(newData);
+            }
+            
+    });
+
+    // Listen for child_changed event with error handling
+    // onChildChanged(db_ref, (snapshot) => {
+    //     const changedData = snapshot.val();
+    //     console.log("Data changed:", changedData);
+    // });
+
+    // Listen for child_removed event with error handling
+    onChildRemoved(db_ref, (snapshot) => {
+        const removedData = snapshot.val();
+        console.log("Data removed:", removedData);
+    });
+
+    // Add a test data point to verify the listener
+    // const testRef = ref(database, '/data/5PdD2BuswlU0hxkvdQ94EbgKoKz1/testNode');
+    //       set(testRef, {
+    //         timestamp: new Date().toISOString(),
+    //         methane: 0.5,
+    //         Pitch_angle: 10,
+    //         Roll_angle: 20,
+    //         water_level: 30,
+    //         battery_level: 40
+    //       }).then(() => {
+    //         console.log("Test data added to verify the listener");
+    //       }).catch((error) => {
+    //         console.error("Error adding test data:", error);
+    //       });
+    
+
+  function updateWebsite(data) {
+    // Update your website DOM here with the new data
+    // For example, if you have a table displaying sensor data:
+    // var newRow = "<tr><td>" + data.timestamp + "</td><td>" + data.methane + "</td><td>" + data.Pitch_angle + "</td><td>" + data.Roll_angle + "</td><td>" + data.water_level + "</td><td>" + data.battery_level + "</td></tr>";
+    // $('#sensorTable tbody').append(newRow);
+    //const parsedTimestamp = dateFns.parse(data.timestamp, "dd MMM yyyy hh:mma", new Date());
+    //const parsedTimestamp = new Date(data.timestamp);
+    //const newRow = `<tr><td>${data.timestamp}</td><td>${data.methane}</td><td>${data.Pitch_angle}</td><td>${data.Roll_angle}</td><td>${data.water_level}</td><td>${data.battery_level}</td></tr>`;
+    
+    const newRow = `
+    <tr>
+        <td>${data.timestamp}</td>
+        <td>${data.Methane}</td>
+        <td>${data.Pitch_angle}</td>
+        <td>${data.Roll_angle}</td>
+        <td>${data.Water_level}</td>
+        <td>${data.Battery_level}</td>
+    </tr>
+    `;
+    //$('#sensorTable tbody').append(newRow);
+    document.querySelector('#sensorTable tbody').insertAdjacentHTML('beforeend', newRow);
+    updateBatteryLevel(parseFloat(document.querySelector("#sensorTable tbody tr:last-child td:nth-child(6)").innerText));
+    updateDataTable();
+  }
+</script>
+
+<script>
+
+
+</script>
+
+</body>
+</html>

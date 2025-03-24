@@ -1,0 +1,358 @@
+<!-- original_values.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FFFFFF; /* Set background color to white */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #000000;
+            font-weight: bold;
+            background: linear-gradient(180deg, transparent 70%, #8ED6FF 70%);
+            background-size: 100% 200%;
+            transition: background-position 0.3s;
+            padding: 2px;
+        }
+
+        .nav-link:hover {
+            background-position: 0 -100%;
+        }
+
+        footer {
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        .notification-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center; /* Center the title */
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        span {
+            font-weight: bold;
+            color: #5bc0de;
+        }
+
+        .button {
+            background-color: #5bc0de;
+            color: #fff;
+            padding: 1px 15px; /* Reduced padding to make the button smaller */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #46b8da;
+        }
+
+        button.edit {
+            background-color: #5bc0de;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px; /* Adjust as needed */
+        }
+
+        button.edit:hover {
+            background-color: #46b8da;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: relative;
+            cursor: pointer;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 10px;
+            transition: background-color 0.4s;
+            margin-right: 10px;
+        }
+
+        .toggle-slider:before {
+            content: "";
+            height: 16px;
+            width: 16px;
+            position: absolute;
+            left: 2px;
+            bottom: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            transition: transform 0.4s, background-color 0.4s;
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background-color: #5bc0de;
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(20px);
+            background-color: #fff;
+        }
+
+        .notification label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .edit-button {
+            background-color: #5bc0de;
+            color: #fff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-left: 10px;
+            align-items: right; /* Align the button to the left */
+            
+        }
+
+        .edit-button:hover {
+            background-color: #46b8da;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="#" class="logo">Smart Manhole</a>
+        <div class="nav-container">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/sensor" class="nav-link">Monitoring</a>
+            <a href="/controlpanel" class="nav-link">Control Panel</a>
+            <a href="/report_dashboard" class="nav-link">Report Dashboard</a>
+            <a href="/Settings" class="nav-link">Settings</a>
+        </div>
+    </header>
+
+    <h1>Parameter Settings</h1>
+
+    <div class="settings-container">
+        {% if data %}
+            {% for item in data %}
+            <p>Manhole Depth: <span id="Manhole_depth">{{ item.Manhole_depth }}</span><button class="edit-button" onclick="editData('Manhole_depth')">Edit</button></p>
+            <p>Water Threshold: <span id="water_threshold">{{ item.water_threshold }}</span><button class="edit-button" onclick="editData('water_threshold')">Edit</button></p>
+            <p>Gas Threshold: <span id="gas_threshold">{{ item.gas_threshold }}</span><button class="edit-button" onclick="editData('gas_threshold')">Edit</button></p>
+            <p>Blower Duration: <span id="Blower_duration">{{ item.Blower_duration }}</span><button class="edit-button" onclick="editData('Blower_duration')">Edit</button></p>
+            <p>Waterjet Duration: <span id="Waterjet_duration">{{ item.Waterjet_duration }}</span><button class="edit-button" onclick="editData('Waterjet_duration')">Edit</button></p>
+            <p>Sampling Time: <span id="sampling_time">{{ item.sampling_time }}</span><button class="edit-button" onclick="editData('sampling_time')">Edit</button></p>
+            <p>Inlet Angle: <span id="inlet_angle">{{ item.inlet_angle }}</span><button class="edit-button" onclick="editData('inlet_angle')">Edit</button></p>
+            <p>Outlet Angle: <span id="outlet_angle">{{ item.outlet_angle }}</span><button class="edit-button" onclick="editData('outlet_angle')">Edit</button></p>
+            {% endfor %}
+        {% else %}
+            <p>No data found.</p>
+        {% endif %}
+
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Parameter</h2>
+            <label for="parameterInput">New Value:</label>
+            <input type="text" id="parameterInput">
+            <button onclick="saveParameter()">Save</button>
+        </div>
+    </div>
+    <!-- // make a global dict to set threshold for sensor page and this page -->
+    
+    <script>
+        var currentParameter;
+
+        function editData(parameter) {
+            currentParameter = parameter;
+            openModal();
+        }
+
+        // Get the modal
+        var modal = document.getElementById("editModal");
+
+        // Function to open the modal
+        function openModal() {
+            modal.style.display = "block";
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        // Function to save the edited parameter
+        function saveParameter() {
+            var newValue = document.getElementById("parameterInput").value;
+
+            // Call a function to save the new value to the database
+            // For example, you can use an AJAX request to send the new value to the server
+            // and update the database
+            // Here's a basic example using fetch API
+            fetch('/update_parameter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    parameter: currentParameter,
+                    value: newValue
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // If the update was successful, update the value displayed on the page
+                    document.getElementById(currentParameter).textContent = newValue;
+                    // Close the modal
+                    closeModal();
+                    // Display a success message
+                    alert(data.message);
+                } else {
+                    // If there was an error, display an error message
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the parameter. Please try again.');
+
+            });
+        }
+
+        // function editData(parameter) {
+        //     // Redirect to the edit page with the parameter name as a query parameter
+        //     window.location.href = "/callibration?parameter=" + parameter;
+        // }
+
+        
+    </script>
+</body>
+
+</html>

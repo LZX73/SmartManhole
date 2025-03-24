@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waterjetting Control Panel</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff; /* Set background color to white */
+        }
+
+        header {
+            background-color: #FFFFFF;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-panel {
+            flex: 1;
+            padding-right: 20px;
+        }
+        .object-info {
+            flex: 1;
+            padding-left: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        form {
+            text-align: left;
+        }
+        .input-field {
+            display: inline-block;
+            width: 50px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        input[type="range"] {
+            width: 60%;
+            margin-bottom: 10px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-left: 10px;
+            margin-top: 5px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 34px;
+            transition: .4s;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
+        input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        .camera-feed {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .not-connected-message {
+            text-align: center;
+            color: #FF0000; /* Red color for emphasis */
+            font-weight: bold;
+        }
+
+        /* Table styles */
+        #objectInfoTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #objectInfoTable th, #objectInfoTable td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #objectInfoTable th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        #objectInfoTable tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        .object-image {
+            max-width: 100px; /* Adjust the maximum width as needed */
+            height: auto; /* Maintain aspect ratio */
+        }
+
+        /* Button styles */
+        button {
+            background-color: #5d6aff; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        button:hover {
+            background-color: #2b5ab1;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            opacity: 0.8;
+        }
+
+        .footer {
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+            padding: 10px; /* Add padding to the footer */
+            text-align: center; /* Center-align the content within the footer */
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #000000;
+            font-weight: bold;
+            background: linear-gradient(180deg, transparent 70%, #8ED6FF 70%);
+            background-size: 100% 200%;
+            transition: background-position 0.3s;
+            padding: 2px;
+        }
+
+        .nav-link:hover {
+            background-position: 0 -100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="#" class="logo">E-Hole Condition Monitoring</a>
+    <div class="nav-container">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/sensor" class="nav-link">Monitoring</a>
+        <a href="/controlpanel" class="nav-link">Control Panel</a>
+        <a href="/report_dashboard" class="nav-link">Report Dashboard</a>
+        <a href="/Settings" class="nav-link">Settings</a>
+    </div>
+</header>
+
+        <h1>Water Jetting Control Panel</h1>
+            <div id="cameraContainer">
+                <img class="camera-feed" id="camera_feed" src="/video_feed/mid" alt="Camera Feed" onerror="showNotConnectedMessage()">
+                <div class="not-connected-message" id="notConnectedMessage" style="display: none;">Camera Not Connected</div>
+            </div>
+
+            <form>
+                <label for="quality">Camera Quality:</label>
+                <select id="quality" name="quality">
+                    <option value="low">Low</option>
+                    <option value="mid" selected>Medium</option>
+                    <option value="hi">High</option>
+                </select><br><br>
+                <label for="tilt_angle">Tilt Angle:</label>
+                <input type="range" id="tilt_angle" name="tilt_angle" min="0" max="180" value="90">
+                <span class="input-field"><input type="number" id="tilt_angle_input" name="tilt_angle_input" value="90" min="0" max="180" step="1"></span><br><br>
+                <label for="pan_angle">Pan Angle:</label>
+                <input type="range" id="pan_angle" name="pan_angle" min="0" max="180" value="90">
+                <span class="input-field"><input type="number" id="pan_angle_input" name="pan_angle_input" value="90" min="0" max="180" step="1"></span><br><br>
+                <label for="spotlight_state">Spotlight:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="spotlight_state" name="spotlight_state">
+                    <span class="toggle-slider"></span>
+                </label>
+                <br><br>
+                <button type="button" id="waterjet_button_inlet">Turn On Waterjet(inlet)</button>
+                <button type="button" id="waterjet_button_outlet">Turn On Waterjet(outlet)</button>
+                <button type="button" id="blower_button">Turn On Blower</button>
+                <button type="button" id="scan_button">Scan</button>
+                <button type="button" id="capture_button">Capture Image</button>
+                <button type="button" id="report_button">Report</button> 
+            </form>
+        </div>
+
+        <div class="object-info">
+            <h2>Detected Objects</h2>
+            <table id="objectInfoTable">
+                <thead>
+                    <tr>
+                        <th>TimeStamp</th>
+                        <th>Angle (Pan, Tilt)</th>
+                        <th>Object Detected</th>
+                        <th>Confidence Level</th>
+                        <th>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var waterjetState = 0; // Initialize waterjet state to off
+            var blowerState = 0;
+            var scanState = 0;
+            // Function to send control command to server
+            function sendControlCommand() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/update_angles',
+                    data: {
+                        'quality': $('#quality').val(),
+                        'tilt_angle': $('#tilt_angle').val(),
+                        'pan_angle': $('#pan_angle').val(),
+                        'spotlight_state': $('#spotlight_state').prop('checked') ? 1 : 0,
+                        'waterjet_state': waterjetState, // Send waterjet state to server
+                        'blower_state': blowerState,
+                        'scan_state': scanState
+                    },
+                    success: function(response) {
+                        console.log(response);
+                    }
+                });
+            }
+
+            // Trigger quality change event on page load to start the video feed
+            $('#quality').trigger('change');
+
+            // Handle quality change
+            $('#quality').change(function() {
+                var selectedQuality = $(this).val();
+                var feedUrl;
+                if (selectedQuality === "low") {
+                    feedUrl = "/video_feed/low";
+                } else if (selectedQuality === "mid") {
+                    feedUrl = "/video_feed/mid";
+                } else if (selectedQuality === "hi") {
+                    feedUrl = "/video_feed/hi";
+                }
+                $('#camera_feed').attr('src', feedUrl);
+
+                // Send selected quality to server
+                sendControlCommand();
+            });
+
+            // Update angle input fields when sliders change
+            $('#tilt_angle, #pan_angle').on('input', function() {
+                var angleId = $(this).attr('id');
+                $('#' + angleId + '_input').val($(this).val());
+            });
+
+            // Update angle sliders when input fields change
+            $('#tilt_angle_input, #pan_angle_input').on('input', function() {
+                var angleId = $(this).attr('id').split('_')[0];
+                $('#' + angleId).val($(this).val());
+            });
+
+            // Handle input changes for tilt and pan angles, and spotlight state
+            $('#tilt_angle, #pan_angle, #spotlight_state').on('input', function() {
+                // Retrieve angle values and spotlight state
+                var tiltAngle = $('#tilt_angle').val();
+                var panAngle = $('#pan_angle').val();
+                var spotlightState = $('#spotlight_state').prop('checked') ? 1 : 0;
+
+                // Send control command to server
+                sendControlCommand();
+            });
+
+            // Waterjet button click event
+            $('#waterjet_button_inlet').on('click', function() {
+                // Set waterjetState to 1 when clicked
+                waterjetState = 1;
+
+                // Send control command
+                sendControlCommand();
+
+                // Automatically set waterjetState back to 0 after a delay (e.g., 3 seconds)
+                setTimeout(function() {
+                    waterjetState = 0;
+
+                }, 100); // Adjust the delay as needed (e.g., 3000 milliseconds for 3 seconds) turn back 0 after clicked
+            });
+
+            $('#waterjet_button_outlet').on('click', function() {
+                // Set waterjetState to 1 when clicked
+                waterjetState = 2;
+                
+                // Send control command
+                sendControlCommand();
+                
+                // Automatically set waterjetState back to 0 after a delay (e.g., 3 seconds)
+                setTimeout(function() {
+                    waterjetState = 0;
+                    
+                }, 100); // Adjust the delay as needed (e.g., 3000 milliseconds for 3 seconds) turn back 0 after clicked
+            });
+
+            // blower button click event
+            $('#blower_button').on('click', function() {
+                // Set waterjetState to 1 when clicked
+                blowerState = 1;
+
+                // Send control command
+                sendControlCommand();
+
+                // Automatically set waterjetState back to 0 after a delay (e.g., 3 seconds)
+                setTimeout(function() {
+                    blowerState = 0;
+
+                }, 100); // Adjust the delay as needed (e.g., 3000 milliseconds for 3 seconds) turn back 0 after clicked
+            });
+
+            $('#scan_button').on('click', function() {
+                // Set waterjetState to 1 when clicked
+                scanState = 1;
+
+                // Send control command
+                sendControlCommand();
+
+                // Automatically set waterjetState back to 0 after a delay (e.g., 3 seconds)
+                setTimeout(function() {
+                    scanState = 0;
+
+                }, 100); // Adjust the delay as needed (e.g., 3000 milliseconds for 3 seconds) turn back 0 after clicked
+            });
+
+            $('#capture_button').on('click', function() {
+                // Send AJAX POST request to capture and upload frame
+                $.post('/capture_and_upload_frame', function() {
+
+                });
+            });
+
+            // Report button click event
+            $('#report_button').on('click', function() {
+                // Send AJAX POST request to report maintenance
+                $.post('/send_report_email', function(response) {
+                    alert('Maintenance report email sent successfully!');
+                }).fail(function() {
+                    alert('Failed to send maintenance report email.');
+                });
+            });
+
+            // Function to fetch detected object information
+            function fetchDetectedObjects() {
+                $.get('/detected_objects', function(data) {
+                    // Clear existing table rows
+                    $('#objectInfoTable tr:not(:first)').remove();
+
+                    // Append new rows with detected object information
+                    data.forEach(function(obj) {
+                        var newRow = '<tr>' +
+                            '<td>' + obj.timestamp + '</td>' +
+                            '<td>(' + obj.pan_angle + ', ' + obj.tilt_angle + ')</td>' +
+                            '<td>' + obj.class_name + '</td>' +
+                            '<td>' + obj.confidence + '</td>' +
+                            '<td><img class="object-image" src="' + obj.image_url + '" alt="' + obj.class_name + '"></td>' + // New column for image
+                            '</tr>';
+                        $('#objectInfoTable').append(newRow);
+                    });
+                }).fail(function() {
+                    // Handle failure of AJAX request
+                    console.error('Failed to fetch detected objects.');
+                });
+            }
+
+            // Fetch detected object information every 5 seconds
+            setInterval(fetchDetectedObjects, 5000);
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration</title>
+
+    <style>
+        /* Your CSS styles here */
+    </style>
+</head>
+
+<body>
+    <header>
+        <!-- Your header content here -->
+    </header>
+
+    <h1>System Calibration</h1>
+
+    <form id="dataForm">
+        <!-- Display the parameter name dynamically based on the query parameter -->
+        <label for="parameter">Parameter Name:</label>
+        <input type="text" id="parameter" name="parameter" value="{{ parameter }}" readonly>
+        <br>
+
+        <!-- Input field for the parameter value -->
+        <label for="value">New Value:</label>
+        <input type="text" id="value" name="value" required>
+        <br>
+
+        <!-- Submit and cancel buttons -->
+        <button type="button" onclick="submitData()">Submit</button>
+        <button type="button" class="cancel" onclick="cancel()">Cancel</button>
+
+        <!-- Error message placeholder -->
+        <div class="error" id="errorMessage"></div>
+    </form>
+
+    <footer>
+        <!-- Your footer content here -->
+    </footer>
+
+    <script>
+        function submitData() {
+            const errorMessageElement = document.getElementById('errorMessage');
+
+            // Get the parameter name and value from the form
+            const parameter = document.getElementById('parameter').value;
+            const value = document.getElementById('value').value;
+
+            // Validate the input value (add your validation logic here)
+            if (!value) {
+                errorMessageElement.textContent = 'Please enter a valid value.';
+                return;
+            }
+
+            // Clear previous error messages
+            errorMessageElement.textContent = '';
+
+            // Send the parameter name and value to the server
+            fetch('/submit_calibration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    parameter: parameter,
+                    value: value
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Display success message
+                // Redirect to the settings page after successful submission
+                window.location.href = "/settings";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function cancel() {
+            // Redirect to the settings page
+            window.location.href = "/settings";
+        }
+    </script>
+</body>
+
+</html>
